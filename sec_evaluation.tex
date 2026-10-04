@@ -1,0 +1,54 @@
+\section{Performance Evaluation}
+
+\subsection{Experimental Setup}
+Unlike synthetic benchmarks used in previous sections, this study focuses on the source of computational expense inside the application itself. The key question to ask here is when and where the bulk of the cryptographic effort takes place and what remains in the course of normal conversation.
+
+Such an approach is well-suited to a prototype as it shows possible bottlenecks in the user experience. End users normally notice the lagging performance during initial setup without experiencing any other issues during regular messaging.
+
+\subsection{Distribution of Runtime Costs}
+Table~\ref{tab:latency} presents the distribution of cryptographic workload in the working system.
+
+\begin{table}[htbp]
+\centering
+\caption{Cost Distribution in the Prototype}
+\label{tab:latency}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\columnwidth}{@{}l l X@{}}
+\toprule
+\textbf{Stage} & \textbf{Frequency} & \textbf{Operations Involved} \\
+\midrule
+First launch & Once per device & Firebase initialization, X25519 key pair generation~\cite{rfc7748}, ML-KEM-768 key pair generation~\cite{fips203}, secure storage operations, publishing public keys \\
+First chat with a peer & Once per chat & Firestore transaction, computing X25519 shared secret~\cite{rfc7748}, ML-KEM-768 encapsulation/decapsulation~\cite{fips203}, deriving HKDF-SHA256 session keys \\
+Outgoing message & Per message & AES-256-GCM encryption~\cite{gcm}, base64 encoding of the nonce and ciphertext-with-tag, Firestore writing \\
+Incoming message & Per message & Firestore snapshot delivering, base64 decoding, AES-256-GCM decryption and validation~\cite{gcm} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The bulk of computational effort is performed once in the beginning. After that, ordinary chat operations follow a much less expensive path.
+
+This matters from the perspective of user experience, because if the application slows down every time there is a new message, user experience quickly goes south. On the contrary, if the extra effort appears only during the first chat initialization, then its cost is relatively manageable.
+
+\subsection{Overhead of Payload and Storage}
+One of the practical implications of post-quantum cryptography is large size of some keys~\cite{fips203}. In the prototype, these keys are stored in base64-encoded form in Firebase and therefore take additional space.
+
+\begin{table}[htbp]
+\centering
+\caption{Artifact Sizes and their Firestore Representation}
+\label{tab:size}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\columnwidth}{@{}X r r@{}}
+\toprule
+\textbf{Artifact} & \textbf{Size in Raw Bytes} & \textbf{Base64 Encoded Length} \\
+\midrule
+X25519 public key~\cite{rfc7748} & 32 & 44 \\
+ML-KEM-768 public key~\cite{fips203} & 1184 & 1580 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+The extra bulk occurs mainly during the process of registration and the first chat configuration.
+After that, the messages will stay relatively light and fast.
+
+This is a reflection of the trade-off made in the course of the project: the system allows for more bulk data to be stored in exchange for efficient messages exchange. This trade-off is quite appropriate for a mobile chat app.

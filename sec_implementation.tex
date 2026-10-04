@@ -1,0 +1,51 @@
+\section{Implementation Details}
+
+\subsection{Layering and Framework}
+The Kyber application was developed using the Dart programming language in the Flutter framework. The code structure was made in order to make it easier to manage the screen layer, application state, cryptography, and Firebase.
+
+In its turn, the main code base is represented by four modules:
+\begin{enumerate}
+    \item \texttt{KyberKEM}: Kyber component.
+    \item \texttt{HybridKeyExchange}: Two shared secrets.
+    \item \texttt{CryptoSession}: Encryption/decryption of the message.
+    \item \texttt{ChatRepository}: Connection between UI and Firebase.
+\end{enumerate}
+
+\subsection{Application Initialization and Discovery of Other Users}
+At application startup, the system makes authentication, creates necessary keys and shares the public ones, keeping the private keys on the device.
+
+The discovery process of the peer is rather simple. The system shows the users who are nearby, lets the user pick one of them, and opens the chat where these two users can send each other messages.
+
+This decision was made on purpose as the prototype of the application does not try to solve all of the social problems. It tries to focus on the core functionality – finding another person, establishing a secure session and sending an encrypted message.
+
+\subsection{Client-Side Keys}
+Client-side keys are stored in the secure device storage \cite{bsi_hybrid}.
+\begin{itemize}
+    \item \textbf{Android} device: uses Android Keystore;
+    \item \textbf{iPhone and iPad}: uses Keychain.
+    \item \textbf{Linux Desktop}: uses the available local secure storage.
+\end{itemize}
+The private keys are never stored on the regular application storage or logs.
+
+\subsection{Sessions and Message Streaming}
+For starting a chat the system first checks the presence of the session key. In case there is already one, the chat is opened at once. If there is no session key, the system receives the public keys from the other user, determines who is the initiator, creates the session key and stores it \cite{pqxdh}.
+// Initiate or Resume a Chat
+If a cached session, which corresponds to chatId, is available, openChat(chatId) is called. Otherwise, peerKeys are fetched from the peer, with peerId specified; then, the role, whether it's an initiator or responder, is determined; after that, a sessionKey is computed based on peerKeys and a role; finally, the sessionKey is saved with chatId.
+
+While operating in live-chat mode, the application listens to new messages at Firebase, locally decrypts them, and displays decrypted content. The outgoing messages are encrypted before being uploaded to Firebase; hence, the latter contains only encrypted payloads.
+
+The distinction between the initial setup and the message exchange process is meaningful in terms of functionality. The computation is performed during initial setup only; the chat cycle is performed efficiently, with low overhead.
+
+Security Controls for Users
+The application implements two easy-to-use security mechanisms:
+1) Session Fingerprints: a short piece of code, which can be checked by the counterparty.
+2) Biometric Lock: the application can block itself if it moves to the background mode.
+
+Neither mechanism changes cryptographic primitives used internally but is helpful during the normal usage.
+
+Besides, these mechanisms make the prototype more complete. A secure chat application is more than a management of secret keys; it is about protection in various situations, including unattended devices and authentication of interlocutor.
+
+Android Biometric API Implementation
+Using the Android biometric API is implemented via adding a special activity class and having a proper permission defined in the manifest file. Having all necessary configuration done, the application gains access to the native biometric capabilities. If there are no such capabilities, the application switches to a simple local-mode.
+
+The graceful fall back to the simple mode is reasonable because of the device behavior's inconsistency. The prototype needs to consider such factors carefully. In the current prototype implementation, the application works well even without the biometric capability.

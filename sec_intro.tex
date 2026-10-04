@@ -1,0 +1,11 @@
+\section{Introduction}
+
+Modern messaging apps should keep chats private. Today this usually depends on public-key cryptography, but future quantum computers may weaken some of those methods~\cite{shor,grover}.Therefore, post-quantum alternatives are becoming more researched and utilized~\cite{fips203,bsi_hybrid}.
+
+Kyber is a Flutter chat prototype that uses both a classical key exchange and a post-quantum one~\cite{rfc7748,fips203,pqxdh}. The aim is simple: keep chats private even if one method becomes weak later. Private keys stay on the phone, and Firebase is only used to pass encrypted data.
+
+The app is built as a practical prototype. A chat app has to handle sign-in, key storage, chat setup, message sending, and recovery after errors. Those parts matter as much as the encryption. Kyber shows that post-quantum security can fit into that full flow.
+
+The hybrid setup also helps during the change to post-quantum cryptography. Since these tools are still new, it is safer to keep a classical method too. If one side becomes weak later, the other side can still protect the session key.
+
+The rest of the paper is organized as follows. Section II looks at related work. Section III explains the system layout. Section IV describes the main crypto idea. Section V covers security limits. Section VI explains the app implementation. Section VII gives a simple performance view. Section VIII closes the paper.

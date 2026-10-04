@@ -1,0 +1,28 @@
+\section{Conclusion and Future Work}
+
+\subsection{Conclusion}
+The Kyber project proves the possibility of using the classical and post-quantum key exchange methods for chat protection~\cite{rfc7748,fips203,pqxdh}. The architecture keeps all private keys local to the user device, sends only encrypted data over Firebase, and uses only one session key per each chat.
+
+This work is valuable by being an actual working application, not just a theory. Moreover, it defines the primary trade-offs: the server has the access to metadata, initial contact trust problem is not solved, and the access control policy needs to be strengthened~\cite{dolev_yao}. But even with all these problems existing, the prototype shows that post-quantum messaging in a standard Flutter app is possible nowadays.
+
+The architecture provides a natural way forward. It does not try to solve all hard problems at once, but focuses on the most important things needed for a regular chat: key management, confidentiality of messages, and simple enough system for mobile platform.
+
+\subsection{Future Work}
+There are several natural directions for future work:
+
+\subsubsection{Inclusion of the Double Ratchet Algorithm}
+Periodical update of the chat keys will reduce the effect of the keys being compromised or expired.
+
+\subsubsection{Authorization of Participants and Metadata Reduction}
+Access rules on Firebase must be tightened to allow only two specific participants to access the chat and limit metadata exposure if possible.
+
+\subsubsection{Key Verification}
+The session fingerprint can be made more verifiable, for example using QR codes or special interface.
+
+\subsubsection{Testing with Native Cryptography and Benchmarks}
+Extended testing on other devices and inclusion of native cryptographic algorithms if needed.
+
+\subsubsection{Post-Quantum Group Messaging}
+The support of group chats is a natural evolution step of the system.
+
+Besides, the interface can be improved. The better verification, feedback on the first chat start and other changes in the UI can make the application better, but do not change its cryptographic part. This is important because it helps to increase the impact of the applications which are secure.

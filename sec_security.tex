@@ -1,0 +1,49 @@
+\section{Security Analysis}
+
+\subsection{Threat Model and Adversary Capabilities}
+We treat the network and relay as untrusted~\cite{dolev_yao}. An attacker may watch, change, delete, or inject messages.
+
+That is the right model for a cloud-backed chat app. If the backend is trusted too much, the security story becomes weak from the start. Kyber assumes the server may be curious or compromised.
+
+Furthermore, we extend the adversary's capabilities to include:
+\begin{enumerate}
+    \item \textbf{Compromised relay}: the attacker can access the Firebase data.
+    \item \textbf{Future quantum computers}: the attacker may later get much stronger machines~\cite{shor,grover}.
+    \item \textbf{Harvest now, decrypt later}: the attacker may save traffic now and try to read it later.
+\end{enumerate}
+Because this is a prototype, we also count some normal app risks: first-contact trust, visible metadata, and access rules that are not finished yet.
+
+These limits are worth saying clearly. They do not mean the project failed. They just show what still needs work.
+
+\subsection{Security Idea}
+The main security idea is simple: the app uses two different key methods and combines them~\cite{pqxdh}. If one becomes weak, the other can still protect the chat key.
+
+That is why the design is hybrid. It gives the app a safer path than relying on only one method while post-quantum tools are still new.
+
+\subsection{Defense-in-Depth Measures}
+Kyber also adds a few extra protections.
+
+\subsubsection{Device-Level Biometric Lock}
+The app can lock itself with fingerprint or face unlock when it moves to the background~\cite{pq3}. That helps if someone else gets the phone.
+
+\subsubsection{Secure Database Authorization Rules}
+The Firebase rules block plain text messages and require the sender to be signed in. They still need to be tightened so only the two chat participants can read or write the chat data~\cite{dolev_yao}.
+
+This shows the difference between encryption and access control. Encryption hides the message. Access rules decide who can touch the data. A complete system needs both.
+
+\subsection{Residual Limitations}
+The prototype still has some limits.
+
+\subsubsection{Trust-On-First-Use Key Binding}
+The first time two people chat, the app trusts the public keys it sees. That is easy, but it also means the user still needs a better way to confirm who they are talking to.
+
+This is what separates a working prototype from a polished messenger. The app is good enough to show the design, but it still needs a verification step.
+\subsubsection{Visibility of Metadata}
+Firebase logs details about participant identity, time stamps of communications, and the amount of data sent. Thus, even as the app keeps messages safe, it does not ensure that metadata is kept safe as well.
+
+This aspect carries weight since, even as a private message still proves useful with server access to some traffic information, the message cannot be called truly private.
+
+\subsubsection{Per-Chat Static Session Keys}
+Once generated, the same chat key is used during the same chat session. While this method is straightforward, it is less secure compared to key refreshments within an architecture.
+
+The advantages of this method stem from simplicity itself; the disadvantages emanate from the possibility that a compromised key may still be active for a long time.

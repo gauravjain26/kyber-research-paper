@@ -1,0 +1,71 @@
+\documentclass[conference,a4paper]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc,fit,shapes.geometric}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{mdframed}
+\usepackage{microtype}
+
+\newtheorem{theorem}{Theorem}
+\renewcommand{\arraystretch}{1.05}
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
+\newcommand{\kyberauthorcell}[1]{%
+\shortstack[c]{%
+\textbf{#1} \\[0.3em]
+\textit{Department of Cyber Security} \\
+\textit{Parul Institute of Engineering \& Technology,} \\
+\textit{Parul University} \\
+Vadodara, Gujarat, India.}}
+
+\begin{document}
+
+\title{Kyber: A Hybrid Post-Quantum End-to-End Encrypted Messaging Protocol for Mobile Platforms}
+
+\author{
+\begingroup
+\setlength{\tabcolsep}{18pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{>{\centering\arraybackslash}p{0.41\textwidth} >{\centering\arraybackslash}p{0.41\textwidth}}
+\kyberauthorcell{Dr. Mukesh Patidar} & \kyberauthorcell{Prof. Pirmohammad Khan} \\
+\\[0.9em]
+\kyberauthorcell{Gaurav N Jain} & \kyberauthorcell{Kartik Vyas} \\
+\\[0.9em]
+\kyberauthorcell{Parveen Kumar} & \kyberauthorcell{Soumya Rawat} \\
+\end{tabular}
+\endgroup
+}
+
+\maketitle
+
+\begin{abstract}
+Kyber is an introduction to a messaging system prototype built using Flutter that aims at maintaining the confidentiality of chat contents by implementing classical as well as quantum-resistant key exchanges. In addition to this, the app will store the private keys in the local device memory, uses only Firebase as a message relay and ensures secure transmission of messages via encryption. Furthermore, the paper highlights some of the shortcomings of the messaging prototype.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Post-Quantum Cryptography, ML-KEM, Kyber-768, X25519, AES-256-GCM, Hybrid Key Exchange, End-to-End Encryption, Mobile Security.
+\end{IEEEkeywords}
+
+\input{sec_intro}
+\input{sec_related}
+\input{sec_architecture}
+\input{sec_cryptography}
+\input{sec_security}
+\input{sec_implementation}
+\input{sec_evaluation}
+\input{sec_conclusion}
+\input{sec_results}
+\input{sec_references}
+
+\end{document}

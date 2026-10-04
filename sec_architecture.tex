@@ -1,0 +1,74 @@
+\section{System Architecture}
+
+\subsection{Architectural Paradigm}
+The communication between Kyber clients and the server is based on a client-server model which is very simple in its nature. Chat messages are not seen by the server in clear form; the server is not aware of private keys~\cite{dolev_yao}; it only forwards the encrypted data and the public keys required to initiate chat sessions.
+
+Such architecture is appropriate for mobile application since the process of typing, reading, encrypting, and decrypting messages is done by the device anyway. In case the application is properly implemented, there is no need in the server’s access to the chat.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[node distance=2cm, auto, >=stealth]
+  % Styles
+  \tikzstyle{device} = [rectangle, draw, fill=blue!10, text width=6.5em, text centered, rounded corners, minimum height=4em, thick]
+  \tikzstyle{cloud} = [draw, ellipse, fill=red!10, text width=6em, text centered, minimum height=4em, thick]
+  \tikzstyle{storage} = [draw, cylinder, fill=green!10, text width=5em, text centered, minimum height=3.5em, shape border rotate=90, thick]
+  
+  % Nodes
+  \node [device] (clientA) {Client A\\(Initiator)};
+  \node [storage, below of=clientA, node distance=2.2cm] (storeA) {Secure Storage\\(Enclave)};
+  \node [cloud, right of=clientA, node distance=3.2cm] (firebase) {Firebase Cloud\\(Untrusted Relay)};
+  \node [device, right of=firebase, node distance=3.2cm] (clientB) {Client B\\(Responder)};
+  \node [storage, below of=clientB, node distance=2.2cm] (storeB) {Secure Storage\\(Enclave)};
+
+  % Paths / Edges
+  \draw [<->, thick] (clientA) -- node[above, scale=0.7] {Base64 Blobs} (firebase);
+  \draw [<->, thick] (clientB) -- node[above, scale=0.7] {Base64 Blobs} (firebase);
+  \draw [->, dashed, thick] (clientA) -- node[left, scale=0.7] {Local Store} (storeA);
+  \draw [->, dashed, thick] (clientB) -- node[right, scale=0.7] {Local Store} (storeB);
+  
+  % Details inside cloud
+  \node [below of=firebase, node distance=1.8cm, text width=8.5em, align=left, font=\scriptsize, draw, fill=yellow!5, rounded corners] (cloudDB) {
+    \textbf{Firestore Schema:}\\
+    $\bullet$ \texttt{users/\{uid\}}\\
+    $\bullet$ \texttt{chats/\{chatId\}}\\
+    $\bullet$ \texttt{messages/\{msgId\}}
+  };
+  \draw [->, dotted] (firebase) -- (cloudDB);
+
+\end{tikzpicture}
+\caption{Diagram indicating key storage locally and Firestore relay transport.}
+\label{fig:sys_arch}
+\end{figure}
+
+Components include:
+\begin{enumerate}
+    \item \textbf{Client devices}: The application is executed here, keys are generated, messages are encrypted and stored locally.
+    \item \textbf{Firebase cloud}: Helps in signing in and sending messages.
+\end{enumerate}
+
+\subsection{Database Schema \& Relay Architecture}
+There are three collections used by the repository - users, chats, and messages. It cannot obtain the content of the message, but there is some metadata available such as participants' identity and date of the message~\cite{dolev_yao}.
+
+This is the compromise. On one hand, the content of the message remains hidden from the server. On the other hand, the very existence of the chat is not entirely anonymous.
+
+\subsubsection{Users Collection}
+The \texttt{users} collection contains public key and basic information about the user. Private key is kept on the device.
+
+\subsubsection{Chats Collection}
+The \texttt{chats} collection contains information about connections between two users. The application uses it to determine what device is going to start the session and what one respond.
+
+\subsubsection{Messages Collection}
+In every chat there is a \texttt{messages} list containing encrypted messages. Plain text is never uploaded to the cloud.
+
+\subsection{Message Transport Flow}
+The message transmission process is straightforward:
+\begin{enumerate}
+    \item Login takes place and keys are generated if necessary.
+    \item The first communication in the chat determines which device initiates.
+    \item The message is encrypted on the client’s device before being sent.
+    \item Firebase delivers the encrypted data.
+    \item The message is decrypted on the recipient’s device.
+\end{enumerate}
+Neither private keys nor session keys reach the server, which ensures the secrecy of the messages’ content, despite metadata remaining open.
+
+The reason why it is crucial to have the first-chat step is to avoid uncertainty regarding who generates the shared secret and who waits for it to be done. In the absence of this step, two devices can simultaneously attempt to initiate the conversation and get stuck in an inconsistent state due to using one transaction.

@@ -1,0 +1,45 @@
+\section{Related Work}
+
+\subsection{Classical Secure Messaging Systems}
+Signal shaped modern secure messaging~\cite{doubleratchet}. It starts by agreeing on keys, then keeps changing those keys as the chat continues. That gives two useful properties:
+\begin{itemize}
+    \item \textbf{Forward Secrecy}: old messages stay safe even if a later key is stolen.
+    \item \textbf{Recovery}: new messages can become safe again after the next key update.
+\end{itemize}
+These systems are widely used, but they still rely on older public-key math that quantum computers may weaken~\cite{shor}.
+
+\subsection{First-Generation Post-Quantum Messaging Protocols}
+Messaging apps are now starting to add post-quantum protection. Two well-known examples are Signal PQXDH and Apple PQ3~\cite{pqxdh,pq3}.
+
+\subsubsection{Signal PQXDH}
+Signal PQXDH mixes a classic key exchange with Kyber so one part can back up the other~\cite{pqxdh}. The idea is the same as in this paper: use two methods and combine the results into one session key.
+
+\subsubsection{Apple PQ3}
+Apple PQ3 also uses post-quantum protection in messaging~\cite{pq3}. It mixes two kinds of key exchange and updates keys over time, which helps limit damage if a device state is exposed.
+
+\subsection{Standardized Hybrid Key Exchanges in TLS and VPNs}
+Post-quantum hybrids are not only for messaging. They are also being used in web and VPN security~\cite{ietf_hybrid_tls,ietf_hybrid_ike}. That shows these ideas work outside research papers too.
+
+\subsection{Mobile PQC Implementations}
+The use of mobile phones makes it harder as the applications need to be small and fast. While some of these cryptography libraries require native implementation, there are others that could be executed in Dart~\cite{fips203}. In this work, the latter approach was chosen as it made prototyping easier.
+
+Kyber falls into this category as a full-blown Flutter application. The value of this project is not in introducing a novel cryptography technique. Rather, it is in creating an example of post-quantum messaging in a standard mobile application.
+
+\subsection{Comparison of Protocols}
+As seen from Table~\ref{tab:comparison}, Kyber also employs a similar principle, common to other secure communication schemes: it combines an old scheme with a new post-quantum scheme and stores the keys locally.
+
+\begin{table*}[t]
+\centering
+\caption{Cryptographic Comparison of Messaging Protocols}
+\label{tab:comparison}
+\begin{tabular}{llllll}
+\toprule
+\textbf{Protocol} & \textbf{Classical Alg.} & \textbf{PQ Alg.} & \textbf{Hybrid KDF} & \textbf{Transport Relay} & \textbf{State Storage} \\
+\midrule
+Signal X3DH~\cite{doubleratchet} & X25519~\cite{rfc7748} & None & HKDF-SHA256 & Signal Server & SQLite (SQLCipher) \\
+Signal PQXDH~\cite{pqxdh} & X25519~\cite{rfc7748} & Kyber-1024~\cite{pqxdh} & HKDF-SHA256 & Signal Server & SQLite (SQLCipher) \\
+Apple PQ3~\cite{pq3} & ECDH P-256 & Kyber-768~\cite{pq3} & HKDF-SHA256 & iCloud APNs & Keychain (Secure Enclave) \\
+\textbf{Kyber (Prototype)} & \textbf{X25519~\cite{rfc7748}} & \textbf{Kyber-768~\cite{fips203}} & \textbf{HKDF-SHA256} & \textbf{Firebase Firestore} & \textbf{Flutter Secure Storage} \\
+\bottomrule
+\end{tabular}
+\end{table*}
